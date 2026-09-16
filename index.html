@@ -218,7 +218,9 @@ let db=JSON.parse(localStorage.getItem(KEY)||"null")||{records:[],timetable:defa
 // 安全遷移：若舊版主資料含姓名，先搬到本機姓名表，再從主資料永久移除姓名／性別。
 (db.students||[]).forEach(st=>{if(st?.name&&!localNames[st.id])localNames[st.id]=st.name});
 saveLocalNames();
-db.students=(db.students||STUDENTS).map(st=>({id:String(st.id),no:String(st.no||st.id),active:st.active!==false}));
+db.students=(Array.isArray(db.students)&&db.students.length?db.students:STUDENTS).map(st=>({id:String(st.id),no:String(st.no||st.id),active:st.active!==false}));
+// 若前一個安全版曾把學生陣列存成空白，重新補回 01～18。
+if(!db.students.length) db.students=STUDENTS.map(st=>({...st}));
 db.activities=db.activities||DEFAULT_ACTIVITIES; db.types=db.types||DEFAULT_TYPES; db.tracking=db.tracking||[];
 // 資料遷移：修正舊版本已儲存在瀏覽器內的活動情境名稱
 db.activities = db.activities.map(x => ["考試／測驗","考試/測驗","評量／測驗"].includes(x) ? "評量測驗" : x);
